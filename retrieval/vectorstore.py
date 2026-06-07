@@ -1,4 +1,5 @@
-from typing import List, Dict, Any
+from pathlib import Path
+from typing import List, Dict, Any, Optional
 import numpy as np
 import chromadb
 from sentence_transformers import SentenceTransformer
@@ -8,8 +9,39 @@ class VectorStore:
     """ChromaDB-backed vector store with sliding-window chunking.
     """
 
-    def __init__(self, collection_name: str, embedding_model: SentenceTransformer):
-        self.client = chromadb.Client()
+    def __init__(
+        self,
+        collection_name: str,
+        embedding_model: SentenceTransformer,
+        persist_directory: Optional[str] = None,
+        chroma_mode: str = "local",
+        chroma_tenant: Optional[str] = None,
+        chroma_database: Optional[str] = None,
+        chroma_api_key: Optional[str] = None,
+        chroma_host: str = "localhost",
+        chroma_port: int = 8000,
+        chroma_ssl: bool = False,
+    ):
+        if chroma_mode == "cloud" or (chroma_tenant and chroma_database and chroma_api_key):
+            self.client = chromadb.CloudClient(
+                api_key=chroma_api_key,
+                tenant=chroma_tenant,
+                database=chroma_database,
+                cloud_host=chroma_host,
+                cloud_port=chroma_port,
+                enable_ssl=chroma_ssl,
+            )
+        elif chroma_mode == "http":
+            self.client = chromadb.HttpClient(
+                host=chroma_host,
+                port=chroma_port,
+                ssl=chroma_ssl,
+            )
+        elif persist_directory:
+            Path(persist_directory).mkdir(parents=True, exist_ok=True)
+            self.client = chromadb.PersistentClient(path=persist_directory)
+        else:
+            self.client = chromadb.Client()
         self.collection = self.client.get_or_create_collection(collection_name)
         self.model = embedding_model
 
@@ -20,6 +52,7 @@ class VectorStore:
 
         for doc in documents:
             chunks = self._chunk(doc["content"])
+            source_doc_id = doc.get("source_doc_id", doc["source"])
             for i, chunk in enumerate(chunks):
                 doc_id = f"{doc['source']}__chunk_{i}"
                 texts.append(chunk)
@@ -27,6 +60,8 @@ class VectorStore:
                 metadatas.append({
                     "source": doc["source"],
                     "source_type": doc["source_type"],
+                    "source_doc_id": source_doc_id,
+                    "chunk_index": i,
                 })
 
         if not texts:

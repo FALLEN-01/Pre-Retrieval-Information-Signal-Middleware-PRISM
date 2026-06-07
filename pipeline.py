@@ -54,7 +54,18 @@ class IOLPipeline:
         print("[Pipeline] Loading embedding model...")
         self.embed_model = SentenceTransformer(self.config.embedding_model)
 
-        self.vectorstore = VectorStore(self.config.chroma_collection, self.embed_model)
+        self.vectorstore = VectorStore(
+            self.config.chroma_collection,
+            self.embed_model,
+            persist_directory=self.config.chroma_persist_directory,
+            chroma_mode=self.config.chroma_mode,
+            chroma_tenant=self.config.chroma_tenant,
+            chroma_database=self.config.chroma_database,
+            chroma_api_key=self.config.chroma_api_key,
+            chroma_host=self.config.chroma_host,
+            chroma_port=self.config.chroma_port,
+            chroma_ssl=self.config.chroma_ssl,
+        )
         self.iol         = InformationOptimizationLayer(self.config.iol, self.embed_model)
         self.consumer    = LLMConsumer() if LLMConsumer is not None else None
 
