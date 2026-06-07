@@ -7,7 +7,6 @@ PRISM provides an Information Optimization Layer (IOL) that sits between retriev
 **Files to know**
 - `pipeline.py` — orchestration entry point and demo ([pipeline.py](pipeline.py))
 - `config.py` — all runtime tunables: `IOLConfig` and `PipelineConfig` ([config.py](config.py))
-- `smoke_test.py` — lightweight test without heavy deps ([smoke_test.py](smoke_test.py))
 - `consumer/llm_consumer.py` — optional LLM consumer wrapper ([consumer/llm_consumer.py](consumer/llm_consumer.py))
 
 ## Quickstart
