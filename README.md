@@ -144,10 +144,3 @@ Customizing Chroma/embedding behavior:
 
 All developer-facing docstrings and comments were generated with the assistance of GitHub Copilot and consolidated in this README to keep source files concise.
 
----
-
-If you want to migrate an existing local `.chroma/` store into Chroma Cloud, use `scripts/migrate_chroma_cloud.py`.
-
-If you'd like, I can:
-- add a short WSL/UNIX command block for the same setup; or
-- add a lightweight health-check command that verifies CloudClient can reach your tenant/database.
